@@ -18,10 +18,13 @@ fn main() -> io::Result<()> {
     }
 
     for entry in &map {
-        let entry2 = 2020 - entry;
-        if map.contains(&entry2) {
-            println!("{}", entry * entry2);
-            return Ok(())
+        for entry2 in &map {
+            let entry3 = 2020 - entry - entry2;
+
+            if map.contains(&entry3) {
+                println!("{}", entry * entry2 * entry3 );
+                return Ok(())
+            }
         }
     }
 
