@@ -5,3 +5,4 @@ authors = ["Anders Sandström <anders.sandstrom89@gmail.com>"]
 
 [dependencies]
 regex = "1"
+matrix = "0.22.0"
