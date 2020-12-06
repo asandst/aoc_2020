@@ -1,35 +1,8 @@
 use std::collections::HashSet;
-use std::fs::File;
-use std::io::prelude::*;
-use std::io::{self, BufReader};
+use std::fs;
+use std::io;
 
 fn main() -> io::Result<()> {
-    let input = File::open("input_day6")?;
-    let input = BufReader::new(input);
-
-    let mut current_group: HashSet<char> = HashSet::new();
-    let mut started = false;
-
-    let mut sum = 0;
-
-    for line in input.lines() {
-        let entry = line.unwrap();
-        let entry = entry.trim();
-
-        if entry.is_empty() {
-            sum += current_group.len();
-            started = false;
-        } else {
-            if !started{
-                current_group = entry.chars().collect();
-                started = true;
-            } else {
-                let person: HashSet<char> = entry.chars().collect();
-                current_group = current_group.intersection(&person).cloned().collect();
-            }
-        }
-    }
-
-    println!("{}", sum);
+    println!("{}", fs::read_to_string("input_day6").unwrap().split("\r\n\r\n").map(|g| g.split("\r\n").fold(None, |acc, x| Some(acc.unwrap_or(x.chars().collect::<HashSet<char>>()).intersection(&x.chars().collect()).cloned().collect()))).map(|s| s.unwrap().len()).sum::<usize>());
     Ok(())
 }
