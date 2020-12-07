@@ -7,3 +7,4 @@ authors = ["Anders Sandström <anders.sandstrom89@gmail.com>"]
 regex = "1"
 matrix = "0.22.0"
 plotters = "0.3.0"
+itertools = "0.8.0"
