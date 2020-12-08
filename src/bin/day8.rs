@@ -1,6 +1,8 @@
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
+use std::time::Instant;
+use std::collections::VecDeque;
 
 fn main() -> io::Result<()> {
     let input = File::open("input_day8")?;
@@ -14,15 +16,25 @@ fn main() -> io::Result<()> {
         let instr = parts[0];
         let value = parts[1].parse::<i64>().unwrap();
 
+        let t: Type = match instr {
+            "acc" => Type::ACC,
+            "jmp" => Type::JMP,
+            "nop" => Type::NOP,
+            _ => panic!(),
+        };
+
         program.push(Instruction {
-            instruction: instr.to_string(),
+            instruction: t,
             value: value,
             visited: false,
         })
     }
+
     let program = program;
 
-    let mut state_part1 =  State {
+    let now = Instant::now();
+
+    let mut state_part1 = State {
         instruction_position: 0,
         accumulator: 0,
         modified_code: false,
@@ -37,20 +49,23 @@ fn main() -> io::Result<()> {
 
         instr.visited = true;
 
-        match instr.instruction.as_str() {
-            "acc" => {
+        match instr.instruction {
+            Type::ACC => {
                 state_part1.accumulator += instr.value;
                 state_part1.instruction_position += 1
             }
-            "jmp" => state_part1.instruction_position = (state_part1.instruction_position as i64+ instr.value) as usize,
-            "nop" => state_part1.instruction_position += 1,
+            Type::JMP => {
+                state_part1.instruction_position =
+                    (state_part1.instruction_position as i64 + instr.value) as usize
+            }
+            Type::NOP => state_part1.instruction_position += 1,
             _ => panic!(),
         }
     }
     println!("Part 1 {}", state_part1.accumulator);
 
-    let mut states: Vec<State> = Vec::new();
-    states.push(State {
+    let mut states: VecDeque<State> = VecDeque::new();
+    states.push_back(State {
         instruction_position: 0,
         accumulator: 0,
         modified_code: false,
@@ -58,70 +73,56 @@ fn main() -> io::Result<()> {
     });
 
     loop {
-        let mut state = states.pop().unwrap();
-        let state_program_clone = state.program.clone();
+        let mut state = states.pop_front().unwrap();
 
         if state.instruction_position == state.program.len() {
             println!("Part 2 {}", state.accumulator);
+            println!("{}", now.elapsed().as_micros());
             break;
         }
 
-        let instr = &mut state.program[state.instruction_position];
+        let mut instr = &mut state.program[state.instruction_position];
         if instr.visited {
             continue;
         }
 
         instr.visited = true;
 
-        match instr.instruction.as_str() {
-            "acc" => {
-                let s1 = State {
-                    instruction_position: state.instruction_position + 1,
-                    accumulator: state.accumulator + instr.value,
-                    modified_code: state.modified_code,
-                    program: state.program,
-                };
-                states.push(s1);
+        match instr.instruction {
+            Type::ACC => {
+                state.instruction_position += 1;
+                state.accumulator += instr.value;
+                states.push_back(state);
             }
-            "jmp" => {
-                let s1 = State {
-                    instruction_position: (state.instruction_position as i64 + instr.value) as usize,
-                    accumulator: state.accumulator,
-                    modified_code: state.modified_code,
-                    program: state.program,
-                };
-                states.push(s1);
+            Type::JMP => {
                 if !state.modified_code {
                     let s2 = State {
                         instruction_position: state.instruction_position + 1,
                         accumulator: state.accumulator,
                         modified_code: true,
-                        program: state_program_clone,
+                        program: program.clone(),
                     };
-                    states.push(s2);
+                    states.push_back(s2);
                 }
+
+                state.instruction_position = (state.instruction_position as i64 + instr.value) as usize;
+                states.push_back(state);
             }
-            "nop" => {
+            Type::NOP => {
                 if !state.modified_code {
                     let s1 = State {
                         instruction_position: (state.instruction_position as i64 + instr.value)
                             as usize,
                         accumulator: state.accumulator,
                         modified_code: true,
-                        program: state_program_clone,
+                        program: program.clone(),
                     };
-                    states.push(s1);
+                    states.push_back(s1);
                 }
 
-                let s2 = State {
-                    instruction_position: state.instruction_position + 1,
-                    accumulator: state.accumulator,
-                    modified_code: state.modified_code,
-                    program: state.program,
-                };
-                states.push(s2);
+                state.instruction_position += 1;
+                states.push_back(state);
             }
-            _ => panic!(),
         }
     }
 
@@ -130,7 +131,7 @@ fn main() -> io::Result<()> {
 
 #[derive(Clone, Debug)]
 struct Instruction {
-    instruction: String,
+    instruction: Type,
     value: i64,
     visited: bool,
 }
@@ -141,4 +142,11 @@ struct State {
     accumulator: i64,
     modified_code: bool,
     program: Vec<Instruction>,
+}
+
+#[derive(Clone, Debug)]
+enum Type {
+    NOP,
+    ACC,
+    JMP,
 }
