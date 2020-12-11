@@ -26,12 +26,11 @@ fn run_until_equilibrium_count_seats (rows: &Vec<Vec<Seat>>, search_len: i64, oc
         for (i, row) in old.iter().enumerate(){
             for (j, seat) in row.iter().enumerate(){
                 let occupied = sum_seen_occupied(i as i64, j as i64, &old, search_len);
-                let new_seat = match seat {
+                new[i as usize][j as usize] = match seat {
                     Seat::EMPTY => if occupied == 0 { Seat::OCCUPIED } else { Seat::EMPTY },
                     Seat::OCCUPIED => if occupied >= occupied_limit { Seat::EMPTY } else { Seat::OCCUPIED },
                     Seat::FLOOR => Seat::FLOOR
                 };
-                new[i as usize][j as usize] = new_seat;
             }
         }
         if old == new {
