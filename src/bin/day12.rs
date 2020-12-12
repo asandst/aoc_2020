@@ -20,11 +20,7 @@ fn main() -> io::Result<()> {
             "S" => State {x: state.x, y: state.y + value, x_dir: state.x_dir, y_dir: state.y_dir},
             "W" => State {x: state.x - value, y: state.y, x_dir: state.x_dir, y_dir: state.y_dir},
             "E" => State {x: state.x + value, y: state.y, x_dir: state.x_dir, y_dir: state.y_dir},
-            "L" => {
-                let (x_dir, y_dir) = rotate(state.x_dir, state.y_dir, &dir, value);
-                State {x: state.x, y: state.y, x_dir, y_dir}
-            },
-            "R" => {
+            "L" | "R" => {
                 let (x_dir, y_dir) = rotate(state.x_dir, state.y_dir, &dir, value);
                 State {x: state.x, y: state.y, x_dir, y_dir}
             },
@@ -42,11 +38,7 @@ fn main() -> io::Result<()> {
             "S" => Waypoint {x: waypoint.x, y: waypoint.y + value},
             "W" => Waypoint {x: waypoint.x - value, y: waypoint.y},
             "E" => Waypoint {x: waypoint.x + value, y: waypoint.y},
-            "L" => {
-                let (x, y) = rotate(waypoint.x, waypoint.y, &dir, value);
-                Waypoint {x, y}
-            },
-            "R" => {
+            "L" | "R" => {
                 let (x, y) = rotate(waypoint.x, waypoint.y, &dir, value);
                 Waypoint {x, y}
             },
