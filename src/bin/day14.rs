@@ -47,7 +47,6 @@ fn main() -> io::Result<()> {
 
     let mut memory : HashMap<u64, u64> = HashMap::new();
     let mut x_mask : u64 = 0;
-    let mut x_inv_mask : u64 = 0;
     let mut value1_mask : u64 = 0;
 
     for line in input {
@@ -58,9 +57,6 @@ fn main() -> io::Result<()> {
             let tmp_x_mask = mask.replace("1", "0").replace("X", "1");
             x_mask = isize::from_str_radix(&tmp_x_mask, 2).unwrap() as u64;
 
-            let tmp_x_inv_mask = mask.replace("0", "1").replace("X", "0");
-            x_inv_mask = isize::from_str_radix(&tmp_x_inv_mask, 2).unwrap() as u64;
-
             let tmp_value1_mask = mask.replace("X", "0");
             value1_mask = isize::from_str_radix(&tmp_value1_mask, 2).unwrap() as u64;
         } else if mem_regex.is_match(&line){
@@ -70,7 +66,7 @@ fn main() -> io::Result<()> {
 
             let x_masks = x_mask_to_all_variants(x_mask);
             for x in x_masks {
-                let masked = addr & x_inv_mask | value1_mask | x;
+                let masked = addr & !x_mask | value1_mask | x;
                 memory.insert(masked, value);
             }
         }
