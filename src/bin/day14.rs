@@ -58,7 +58,7 @@ fn main() -> io::Result<()> {
             let tmp_x_mask = mask.replace("1", "0").replace("X", "1");
             x_mask = isize::from_str_radix(&tmp_x_mask, 2).unwrap() as u64;
 
-            let tmp_x_inv_mask = mask.replace("X", "T").replace("0", "1").replace("T", "0");
+            let tmp_x_inv_mask = mask.replace("0", "1").replace("X", "0");
             x_inv_mask = isize::from_str_radix(&tmp_x_inv_mask, 2).unwrap() as u64;
 
             let tmp_value1_mask = mask.replace("X", "0");
