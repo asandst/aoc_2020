@@ -27,13 +27,12 @@ fn run(mut map: HashSet<Vec<i64>>, points: &Vec<Vec<i64>>) -> usize {
         for active in &map {
             let points_gen = |v1 : Vec<i64>| points.iter().map(move |v2| izip!(v1.iter(), v2.iter()).map(|(value, offset)| value + offset).collect::<Vec<i64>>());
             let (on, off) : (Vec<Vec<i64>>, Vec<Vec<i64>>) =  points_gen(active.clone()).partition(|key| map.contains(key));
-            off.iter().filter(|key| 3 == points_gen(key.clone().to_vec()).filter(|key| map.contains(key)).count()).for_each(|key| drop(new_map.insert(key.clone())));
+            new_map.extend(off.iter().filter(|key| 3 == points_gen(key.clone().to_vec()).filter(|key| map.contains(key)).count()).cloned());
             match on.iter().count() {
                 2 | 3 => drop(new_map.insert(active.clone())),
                 _ => ()
             }
         }
-
         map = new_map;
     }
     map.len()
