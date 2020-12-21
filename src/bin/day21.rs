@@ -1,4 +1,5 @@
 extern crate itertools;
+extern crate rayon;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs::File;
@@ -6,6 +7,7 @@ use std::io::prelude::*;
 use std::io::{self, BufReader};
 use itertools::Itertools;
 use itertools::iproduct;
+use rayon::prelude::*;
 
 fn main() -> io::Result<()> {
     let input = File::open("input_day21")?;
@@ -83,8 +85,8 @@ impl<'a> Solver<'a>{
         let ingredients_used = solution.values().cloned().collect();
         let ingredients_left = self.ingredients.difference(&ingredients_used).cloned().collect::<Vec<String>>();
 
-        let mut left = iproduct!(allergenes_left.iter(), ingredients_left.iter());
-        left.find_map(|(a, i)| {
+        let left = iproduct!(allergenes_left.iter(), ingredients_left.iter()).collect::<Vec<_>>();
+        left.par_iter().map(|&(a, i)| {
             let mut new_solution = solution.clone();
             new_solution.insert(a.clone(), i.clone());
             
@@ -93,7 +95,7 @@ impl<'a> Solver<'a>{
                 Result::Partial => self.solve(&new_solution),
                 Result::Fail => None
             }
-        })
+        }).find_any(Option::is_some).map(Option::unwrap)
     }
 
     fn check(&self, solution: &HashMap<String, String>) -> Result {
@@ -105,7 +107,6 @@ impl<'a> Solver<'a>{
                     }
                 }
             }
-            
         }
 
         if solution.len() == self.allergens.len(){
